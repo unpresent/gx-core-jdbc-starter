@@ -43,6 +43,10 @@
 
         <dependency>
             <groupId>ru.gx.core</groupId>
+            <artifactId>gx-core-root-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.gx.core</groupId>
             <artifactId>gx-core-data-commons</artifactId>
         </dependency>
         <dependency>
