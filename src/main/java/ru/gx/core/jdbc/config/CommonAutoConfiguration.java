@@ -60,9 +60,7 @@ public class CommonAutoConfiguration {
             value = "service.db-saving.jdbc-saver.enabled",
             havingValue = "true"
     )
-    public JdbcDbSaver jdbcDbSaver(
-        @NotNull final DbSavingOperator dbSavingOperator
-    ) {
-        return new JdbcDbSaver(dbSavingOperator);
+    public JdbcDbSaver jdbcDbSaver() {
+        return new JdbcDbSaver();
     }
 }
