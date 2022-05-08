@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import ru.gx.core.jdbc.ActiveConnectionsContainer;
 import ru.gx.core.data.save.AbstractJsonDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
+import ru.gx.core.data.sqlwrapping.ThreadConnectionsWrapper;
+import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 
 import java.sql.CallableStatement;
 import java.sql.SQLException;
@@ -17,14 +18,14 @@ public class JdbcJsonDbSavingOperator
 
     @Getter
     @NotNull
-    private final ActiveConnectionsContainer activeConnectionsContainer;
+    private final JdbcThreadConnectionsWrapper threadConnectionWrapper;
 
     public JdbcJsonDbSavingOperator(
             @NotNull final ObjectMapper objectMapper,
-            @NotNull final ActiveConnectionsContainer activeConnectionsContainer
+            @NotNull final JdbcThreadConnectionsWrapper threadConnectionWrapper
     ) {
         super(objectMapper);
-        this.activeConnectionsContainer = activeConnectionsContainer;
+        this.threadConnectionWrapper = threadConnectionWrapper;
     }
 
     @Override
@@ -32,11 +33,7 @@ public class JdbcJsonDbSavingOperator
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException {
-        var connection = getActiveConnectionsContainer().getCurrent();
-        if (connection == null) {
-            throw new SQLException("Connection isn't registered in ActiveConnectionsContainer");
-        }
-
+        var connection = getThreadConnectionWrapper().getCurrent();
         return connection.prepareCall(sqlCommand);
     }
 

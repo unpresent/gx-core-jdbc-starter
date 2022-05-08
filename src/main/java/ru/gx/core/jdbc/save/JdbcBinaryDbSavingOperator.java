@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import ru.gx.core.jdbc.ActiveConnectionsContainer;
+import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 import ru.gx.core.data.save.AbstractBinaryDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
 
@@ -18,14 +18,14 @@ public class JdbcBinaryDbSavingOperator
 
     @Getter(AccessLevel.PROTECTED)
     @NotNull
-    private final ActiveConnectionsContainer activeConnectionsContainer;
+    private final JdbcThreadConnectionsWrapper threadConnectionsWrapper;
 
     public JdbcBinaryDbSavingOperator(
             @NotNull final ObjectMapper objectMapper,
-            @NotNull final ActiveConnectionsContainer activeConnectionsContainer
+            @NotNull final JdbcThreadConnectionsWrapper threadConnectionsWrapper
     ) {
         super(objectMapper);
-        this.activeConnectionsContainer = activeConnectionsContainer;
+        this.threadConnectionsWrapper = threadConnectionsWrapper;
     }
 
     @Override
@@ -33,11 +33,7 @@ public class JdbcBinaryDbSavingOperator
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException {
-        var connection = getActiveConnectionsContainer().getCurrent();
-        if (connection == null) {
-            throw new SQLException("Connection isn't registered in ActiveConnectionsContainer");
-        }
-
+        var connection = getThreadConnectionsWrapper().getCurrent();
         return connection.prepareCall(sqlCommand);
     }
 

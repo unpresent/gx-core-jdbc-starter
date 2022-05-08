@@ -5,16 +5,31 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = "service")
+@ConfigurationProperties(prefix = "service.db-saving")
 @Getter
 @Setter
 public class ConfigurationPropertiesService {
     @NestedConfigurationProperty
-    private ActiveConnectionsContainer activeConnectionsContainer;
+    private JdbcSaver jdbcSaver;
+
+    @NestedConfigurationProperty
+    private Operator operator;
 
     @Getter
     @Setter
-    public static class ActiveConnectionsContainer {
-        private boolean enabled;
+    public static class JdbcSaver {
+        private boolean enabled = true;
+    }
+
+    @Getter
+    @Setter
+    public static class Operator {
+        public OperatorType operatorType = OperatorType.Json;
+    }
+
+    @SuppressWarnings("unused")
+    public enum OperatorType {
+        Json,
+        Binary
     }
 }
