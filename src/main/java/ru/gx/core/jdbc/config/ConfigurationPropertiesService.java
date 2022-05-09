@@ -13,7 +13,10 @@ public class ConfigurationPropertiesService {
     private JdbcSaver jdbcSaver;
 
     @NestedConfigurationProperty
-    private Operator operator;
+    private Operator jdbcJsonOperator;
+
+    @NestedConfigurationProperty
+    private Operator jdbcBinaryOperator;
 
     @Getter
     @Setter
@@ -24,12 +27,6 @@ public class ConfigurationPropertiesService {
     @Getter
     @Setter
     public static class Operator {
-        public OperatorType operatorType = OperatorType.Json;
-    }
-
-    @SuppressWarnings("unused")
-    public enum OperatorType {
-        Json,
-        Binary
+        public boolean enabled = true;
     }
 }

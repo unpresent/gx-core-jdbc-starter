@@ -10,6 +10,7 @@ import ru.gx.core.data.save.AbstractBinaryDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
 
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 @Accessors(chain = true)
@@ -33,8 +34,8 @@ public class JdbcBinaryDbSavingOperator
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException {
-        var connection = getThreadConnectionsWrapper().getCurrent();
-        return connection.prepareCall(sqlCommand);
+        var connection = getThreadConnectionsWrapper().getCurrentThreadConnection();
+        return ((Connection)connection.getInternalConnection()).prepareCall(sqlCommand);
     }
 
     @Override

@@ -6,7 +6,7 @@ import ru.gx.core.data.sqlwrapping.ConnectionWrapper;
 import ru.gx.core.data.sqlwrapping.ThreadConnectionsWrapper;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,51 +20,56 @@ public class JdbcThreadConnectionsWrapper implements ThreadConnectionsWrapper {
     private final DataSource dataSource;
 
     @NotNull
-    private final Map<Thread, Connection> connections = new HashMap<>();
+    private final Map<Thread, JdbcConnectionWrapper> connections = new HashMap<>();
 
     public JdbcThreadConnectionsWrapper(@NotNull DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    @Nullable
-    public synchronized Connection get(@NotNull final Thread thread) {
-        return this.connections.get(thread);
-    }
-
-    @NotNull
-    public Connection getCurrent() throws SQLException {
-        final var result = get(Thread.currentThread());
-        return (result != null) ?  result : this.dataSource.getConnection();
-    }
-
-    public synchronized void put(@NotNull final Thread thread, @NotNull final Connection connection) {
-        this.connections.put(thread, connection);
-    }
-
-    public synchronized void clear(@NotNull final Thread thread) {
-        this.connections.remove(thread);
-    }
-
-    public void putCurrent(@NotNull final Connection connection) {
-        this.put(Thread.currentThread(), connection);
-    }
-
-    public void clearCurrent() {
-        this.clear(Thread.currentThread());
-    }
     @Override
     @NotNull
     public ConnectionWrapper getCurrentThreadConnection() throws SQLException {
-        return new JdbcConnectionWrapper(getCurrent());
+        var result = internalGet(Thread.currentThread());
+        if (result != null) {
+            result.incRefs(); // incRefs() увеличивает "количество использований"
+        } else {
+            result = new JdbcConnectionWrapper(this.dataSource.getConnection());
+            this.internalPut(Thread.currentThread(), result);
+        }
+        return result;
     }
 
     @Override
     public void putCurrentThreadConnection(@NotNull ConnectionWrapper connectionWrapper) {
-        putCurrent((Connection) connectionWrapper.getInternalConnection());
+        internalPut(Thread.currentThread(), (JdbcConnectionWrapper)connectionWrapper);
     }
 
     @Override
     public void clearCurrentThreadConnection() {
-        clearCurrent();
+        internalRemove(Thread.currentThread());
+    }
+
+    @Nullable
+    protected synchronized JdbcConnectionWrapper internalGet(@NotNull final Thread thread) {
+        return this.connections.get(thread);
+    }
+
+    protected synchronized void internalPut(
+            @NotNull final Thread thread,
+            @NotNull final JdbcConnectionWrapper connectionWrapper
+    ) {
+        final var oldWrapper = this.connections.get(thread);
+        if (oldWrapper != null && !oldWrapper.equals(connectionWrapper)) {
+            oldWrapper.close();
+        }
+        this.connections.put(thread, connectionWrapper);
+    }
+
+    protected synchronized void internalRemove(@NotNull final Thread thread) {
+        final var oldWrapper = this.connections.get(thread);
+        if (oldWrapper != null) {
+            oldWrapper.close();
+        }
+        this.connections.remove(thread);
     }
 }
