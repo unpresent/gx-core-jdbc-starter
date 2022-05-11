@@ -40,6 +40,21 @@ public class JdbcConnectionWrapper implements ConnectionWrapper {
         return new JdbcCallableWrapper(getConnection().prepareCall(sql));
     }
 
+    @Override
+    public void openTransaction() throws SQLException {
+        getConnection().setAutoCommit(false);
+    }
+
+    @Override
+    public void commitTransaction() throws SQLException {
+        getConnection().commit();
+    }
+
+    @Override
+    public void rollbackTransaction() throws SQLException {
+        getConnection().rollback();
+    }
+
     public void incRefs() {
         this.refsCount++;
     }
