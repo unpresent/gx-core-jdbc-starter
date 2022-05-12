@@ -10,8 +10,15 @@ import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static lombok.AccessLevel.PROTECTED;
+
 public class JdbcConnectionWrapper implements ConnectionWrapper {
-    @Getter(AccessLevel.PROTECTED)
+
+    @Getter
+    @NotNull
+    private final JdbcThreadConnectionsWrapper owner;
+
+    @Getter(PROTECTED)
     @NotNull
     private final Connection connection;
 
@@ -21,7 +28,11 @@ public class JdbcConnectionWrapper implements ConnectionWrapper {
      */
     private int refsCount = 1;
 
-    public JdbcConnectionWrapper(@NotNull final Connection connection) {
+    public JdbcConnectionWrapper(
+            @NotNull final JdbcThreadConnectionsWrapper owner,
+            @NotNull final Connection connection
+    ) {
+        this.owner = owner;
         this.connection = connection;
     }
 
@@ -32,12 +43,12 @@ public class JdbcConnectionWrapper implements ConnectionWrapper {
 
     @Override
     public @NotNull SqlCommandWrapper getQuery(@NotNull final String sql) throws SQLException {
-        return new JdbcQueryWrapper(getConnection().prepareStatement(sql));
+        return new JdbcQueryWrapper(getConnection().prepareStatement(sql), this);
     }
 
     @Override
     public @NotNull SqlCommandWrapper getCallable(@NotNull String sql) throws SQLException {
-        return new JdbcCallableWrapper(getConnection().prepareCall(sql));
+        return new JdbcCallableWrapper(getConnection().prepareCall(sql), this);
     }
 
     @Override

@@ -7,12 +7,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.gx.core.data.save.DbSavingConfiguration;
 import ru.gx.core.jdbc.save.JdbcBinaryDbSavingOperator;
 import ru.gx.core.jdbc.save.JdbcDbSaver;
 import ru.gx.core.jdbc.save.JdbcJsonDbSavingOperator;
 import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(ConfigurationPropertiesService.class)
@@ -58,7 +60,9 @@ public class CommonAutoConfiguration {
             value = "service.db-saving.jdbc-saver.enabled",
             havingValue = "true"
     )
-    public JdbcDbSaver jdbcDbSaver() {
-        return new JdbcDbSaver();
+    public JdbcDbSaver jdbcDbSaver(
+            @NotNull final List<DbSavingConfiguration> configurations
+    ) {
+        return new JdbcDbSaver(configurations);
     }
 }

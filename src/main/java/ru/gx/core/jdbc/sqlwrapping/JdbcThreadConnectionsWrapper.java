@@ -31,26 +31,22 @@ public class JdbcThreadConnectionsWrapper implements ThreadConnectionsWrapper {
     public ConnectionWrapper getCurrentThreadConnection() throws SQLException {
         var result = internalGet(Thread.currentThread());
         if (result != null) {
-            result.incRefs(); // incRefs() увеличивает "количество использований"
-        } else {
-            result = new JdbcConnectionWrapper(this.dataSource.getConnection());
-            this.internalPut(Thread.currentThread(), result);
+            if (!result.getConnection().isClosed()) {
+                result.incRefs();
+                return result;
+            } else {
+                internalRemove(Thread.currentThread(), result);
+            }
         }
+        result = new JdbcConnectionWrapper(this, this.dataSource.getConnection());
+        internalPut(Thread.currentThread(), result);
         return result;
     }
 
-    @Override
-    public void putCurrentThreadConnection(@NotNull ConnectionWrapper connectionWrapper) {
-        internalPut(Thread.currentThread(), (JdbcConnectionWrapper)connectionWrapper);
-    }
-
-    @Override
-    public void clearCurrentThreadConnection() {
-        internalRemove(Thread.currentThread());
-    }
-
     @Nullable
-    protected synchronized JdbcConnectionWrapper internalGet(@NotNull final Thread thread) {
+    protected synchronized JdbcConnectionWrapper internalGet(
+            @NotNull final Thread thread
+    ) {
         return this.connections.get(thread);
     }
 
@@ -58,18 +54,15 @@ public class JdbcThreadConnectionsWrapper implements ThreadConnectionsWrapper {
             @NotNull final Thread thread,
             @NotNull final JdbcConnectionWrapper connectionWrapper
     ) {
-        final var oldWrapper = this.connections.get(thread);
-        if (oldWrapper != null && !oldWrapper.equals(connectionWrapper)) {
-            oldWrapper.close();
-        }
         this.connections.put(thread, connectionWrapper);
     }
 
-    protected synchronized void internalRemove(@NotNull final Thread thread) {
-        final var oldWrapper = this.connections.get(thread);
-        if (oldWrapper != null) {
-            oldWrapper.close();
+    protected synchronized void internalRemove(
+            @NotNull final Thread thread,
+            @NotNull final JdbcConnectionWrapper connectionWrapper
+    ) {
+        if (internalGet(thread) == connectionWrapper) {
+            this.connections.remove(thread);
         }
-        this.connections.remove(thread);
     }
 }

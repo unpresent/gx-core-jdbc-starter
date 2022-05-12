@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 import ru.gx.core.data.save.AbstractBinaryDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
@@ -30,12 +31,12 @@ public class JdbcBinaryDbSavingOperator
     }
 
     @Override
-    public @NotNull CallableStatement prepareStatement(
+    public @NotNull SqlCommandWrapper prepareStatement(
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException {
         var connection = getThreadConnectionsWrapper().getCurrentThreadConnection();
-        return ((Connection)connection.getInternalConnection()).prepareCall(sqlCommand);
+        return connection.getCallable(sqlCommand);
     }
 
     @Override
@@ -43,8 +44,8 @@ public class JdbcBinaryDbSavingOperator
             @NotNull final Object statement,
             @NotNull final Object data
     ) throws SQLException {
-        final var stmt = (CallableStatement)statement;
-        stmt.setBytes(1, (byte[])data);
-        stmt.execute();
+        final var stmt = (SqlCommandWrapper)statement;
+        stmt.setBinaryParam(1, (byte[])data);
+        stmt.executeNoResult();
     }
 }

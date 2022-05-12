@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import ru.gx.core.data.save.AbstractJsonDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 
 import java.sql.CallableStatement;
@@ -29,12 +30,12 @@ public class JdbcJsonDbSavingOperator
     }
 
     @Override
-    public @NotNull CallableStatement prepareStatement(
+    public @NotNull SqlCommandWrapper prepareStatement(
             @NotNull final String sqlCommand,
             @NotNull final DbSavingAccumulateMode accumulateMode
     ) throws SQLException {
         var connection = getThreadConnectionsWrapper().getCurrentThreadConnection();
-        return ((Connection)connection.getInternalConnection()).prepareCall(sqlCommand);
+        return connection.getCallable(sqlCommand);
     }
 
     @Override
@@ -42,8 +43,8 @@ public class JdbcJsonDbSavingOperator
             @NotNull final Object statement,
             @NotNull final Object data
     ) throws SQLException {
-        final var stmt = (CallableStatement)statement;
-        stmt.setString(1, (String)data);
-        stmt.execute();
+        final var stmt = (SqlCommandWrapper)statement;
+        stmt.setStringParam(1, (String)data);
+        stmt.executeNoResult();
     }
 }

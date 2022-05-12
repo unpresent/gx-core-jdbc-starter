@@ -20,8 +20,16 @@ public class JdbcCallableWrapper implements SqlCommandWrapper {
     @NotNull
     private final CallableStatement callableStatement;
 
-    public JdbcCallableWrapper(@NotNull final CallableStatement callableStatement) {
+    @Getter
+    @NotNull
+    private final JdbcConnectionWrapper connection;
+
+    public JdbcCallableWrapper(
+            @NotNull final CallableStatement callableStatement,
+            @NotNull final JdbcConnectionWrapper connection
+    ) {
         this.callableStatement = callableStatement;
+        this.connection = connection;
     }
 
     @Override
@@ -58,6 +66,15 @@ public class JdbcCallableWrapper implements SqlCommandWrapper {
             getCallableStatement().setNull(paramIndex, Types.NUMERIC);
         } else {
             getCallableStatement().setBigDecimal(paramIndex, value);
+        }
+    }
+
+    @Override
+    public void setBinaryParam(int paramIndex, byte[] value) throws SQLException {
+        if (value == null) {
+            getCallableStatement().setNull(paramIndex, Types.VARBINARY);
+        } else {
+            getCallableStatement().setBytes(paramIndex, value);
         }
     }
 

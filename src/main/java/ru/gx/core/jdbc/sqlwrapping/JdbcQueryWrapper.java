@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import ru.gx.core.data.sqlwrapping.ResultWrapper;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,8 +19,16 @@ public class JdbcQueryWrapper implements SqlCommandWrapper {
     @NotNull
     private final PreparedStatement preparedStatement;
 
-    public JdbcQueryWrapper(@NotNull final PreparedStatement preparedStatement) {
+    @Getter
+    @NotNull
+    private final JdbcConnectionWrapper connection;
+
+    public JdbcQueryWrapper(
+            @NotNull final PreparedStatement preparedStatement,
+            @NotNull final JdbcConnectionWrapper connection
+    ) {
         this.preparedStatement = preparedStatement;
+        this.connection = connection;
     }
 
     @Override
@@ -58,6 +65,15 @@ public class JdbcQueryWrapper implements SqlCommandWrapper {
             getPreparedStatement().setNull(paramIndex, Types.NUMERIC);
         } else {
             getPreparedStatement().setBigDecimal(paramIndex, value);
+        }
+    }
+
+    @Override
+    public void setBinaryParam(int paramIndex, byte[] value) throws SQLException {
+        if (value == null) {
+            getPreparedStatement().setNull(paramIndex, Types.VARBINARY);
+        } else {
+            getPreparedStatement().setBytes(paramIndex, value);
         }
     }
 
