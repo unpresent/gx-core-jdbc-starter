@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import ru.gx.core.data.save.DbSavingConfiguration;
 import ru.gx.core.jdbc.save.JdbcBinaryDbSavingOperator;
 import ru.gx.core.jdbc.save.JdbcDbSaver;
@@ -17,6 +18,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 @Configuration
+@EnableScheduling
 @EnableConfigurationProperties(ConfigurationPropertiesService.class)
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class CommonAutoConfiguration {
