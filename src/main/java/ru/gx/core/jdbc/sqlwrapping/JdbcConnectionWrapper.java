@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.gx.core.data.sqlwrapping.ConnectionWrapper;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 
@@ -64,6 +65,14 @@ public class JdbcConnectionWrapper implements ConnectionWrapper {
     @Override
     public void rollbackTransaction() throws SQLException {
         getConnection().rollback();
+    }
+
+    @Override
+    public boolean isEqual(@Nullable ConnectionWrapper connectionWrapper) {
+        if (connectionWrapper == null) {
+            return false;
+        }
+        return getInternalConnection().equals(connectionWrapper.getInternalConnection());
     }
 
     public void incRefs() {

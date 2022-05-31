@@ -5,13 +5,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
-import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 import ru.gx.core.data.save.AbstractBinaryDbSavingOperator;
 import ru.gx.core.data.save.DbSavingAccumulateMode;
+import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
+import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 @Accessors(chain = true)
@@ -41,11 +39,10 @@ public class JdbcBinaryDbSavingOperator
 
     @Override
     protected void executeStatement(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException {
-        final var stmt = (SqlCommandWrapper)statement;
-        stmt.setBinaryParam(1, (byte[])data);
-        stmt.executeNoResult();
+        statement.setBinaryParam(1, (byte[])data);
+        statement.executeNoResult();
     }
 }

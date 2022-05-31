@@ -9,8 +9,6 @@ import ru.gx.core.data.save.DbSavingAccumulateMode;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 import ru.gx.core.jdbc.sqlwrapping.JdbcThreadConnectionsWrapper;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 @Accessors(chain = true)
@@ -40,11 +38,10 @@ public class JdbcJsonDbSavingOperator
 
     @Override
     protected void executeStatement(
-            @NotNull final Object statement,
+            @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException {
-        final var stmt = (SqlCommandWrapper)statement;
-        stmt.setStringParam(1, (String)data);
-        stmt.executeNoResult();
+        statement.setStringParam(1, (String)data);
+        statement.executeNoResult();
     }
 }
