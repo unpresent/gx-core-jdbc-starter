@@ -6,7 +6,6 @@ import ru.gx.core.data.sqlwrapping.ConnectionWrapper;
 import ru.gx.core.data.sqlwrapping.ThreadConnectionsWrapper;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;

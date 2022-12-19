@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import ru.gx.core.data.sqlwrapping.ResultWrapper;
 import ru.gx.core.data.sqlwrapping.SqlCommandWrapper;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.SQLException;

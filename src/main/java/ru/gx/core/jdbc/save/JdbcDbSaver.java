@@ -11,4 +11,3 @@ public class JdbcDbSaver extends AbstractDbSaver {
         super(configurations);
     }
 }
-

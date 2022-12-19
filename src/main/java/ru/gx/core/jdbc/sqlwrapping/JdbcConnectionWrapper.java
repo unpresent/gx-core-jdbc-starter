@@ -1,6 +1,5 @@
 package ru.gx.core.jdbc.sqlwrapping;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.NotNull;

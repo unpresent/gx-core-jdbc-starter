@@ -41,7 +41,7 @@ public class JdbcJsonDbSavingOperator
             @NotNull final SqlCommandWrapper statement,
             @NotNull final Object data
     ) throws SQLException {
-        statement.setStringParam(1, (String)data);
+        statement.setStringParam(1, (String) data);
         statement.executeNoResult();
     }
 }
